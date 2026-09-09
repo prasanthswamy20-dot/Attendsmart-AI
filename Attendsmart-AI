@@ -1,0 +1,8 @@
+# AttendSmart - Attendance Rescue Planner
+
+AttendSmart is a smart decision-making attendance management tool designed to help students optimize their class attendance and avoid shortfalls.
+
+## Key Features
+- **What-If Attendance Simulator:** Simulates percentage drops before missing a class.
+- **Attendance Budgeting:** Shows exactly how many classes a student can safely skip per subject.
+- **Recovery Priority Alerts:** Identifies high-risk subjects based on weekly class frequency.
