@@ -1,1 +1,751 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AttendSmart AI</title>
 
+<style>
+*{box-sizing:border-box}
+body{
+    margin:0;
+    font-family:Arial,sans-serif;
+    background:#f4f7fb;
+    color:#172033;
+}
+header{
+    background:linear-gradient(135deg,#2563eb,#7c3aed);
+    color:white;
+    padding:22px 18px;
+    border-radius:0 0 25px 25px;
+}
+header h1{margin:0;font-size:28px}
+header p{margin:7px 0 0;opacity:.9}
+.container{max-width:900px;margin:auto;padding:18px}
+.card{
+    background:white;
+    padding:18px;
+    margin:15px 0;
+    border-radius:18px;
+    box-shadow:0 5px 20px rgba(0,0,0,.07);
+}
+h2{margin-top:0}
+input,select,button{
+    width:100%;
+    padding:12px;
+    margin:7px 0;
+    border-radius:10px;
+    border:1px solid #d5dbea;
+    font-size:15px;
+}
+button{
+    background:#2563eb;
+    color:white;
+    border:0;
+    font-weight:bold;
+    cursor:pointer;
+}
+button:hover{opacity:.9}
+.nav{
+    display:flex;
+    gap:8px;
+    overflow-x:auto;
+    margin:15px 0;
+}
+.nav button{
+    min-width:120px;
+    background:white;
+    color:#2563eb;
+    border:1px solid #d8def0;
+}
+.nav button.active{
+    background:#2563eb;
+    color:white;
+}
+.page{display:none}
+.page.active{display:block}
+.stats{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:10px;
+}
+.stat{
+    background:#eef4ff;
+    padding:15px;
+    border-radius:15px;
+    text-align:center;
+}
+.stat strong{
+    display:block;
+    font-size:24px;
+    color:#2563eb;
+}
+.subject{
+    border:1px solid #e1e5ef;
+    padding:14px;
+    margin:10px 0;
+    border-radius:14px;
+}
+.progress{
+    height:10px;
+    background:#e5e7eb;
+    border-radius:10px;
+    overflow:hidden;
+    margin:8px 0;
+}
+.bar{
+    height:100%;
+    background:#22c55e;
+}
+.low .bar{background:#ef4444}
+.alert{
+    background:#fff7ed;
+    border-left:5px solid #f97316;
+    padding:13px;
+    border-radius:10px;
+    margin:10px 0;
+}
+.success{
+    background:#ecfdf5;
+    border-left:5px solid #22c55e;
+    padding:13px;
+    border-radius:10px;
+}
+.schedule{
+    width:100%;
+    border-collapse:collapse;
+}
+.schedule th,.schedule td{
+    padding:10px;
+    border:1px solid #ddd;
+    text-align:center;
+}
+.schedule th{
+    background:#2563eb;
+    color:white;
+}
+.small{
+    font-size:13px;
+    color:#687086;
+}
+.logout{
+    background:#ef4444;
+}
+.feature{
+    padding:12px;
+    background:#f8faff;
+    border-radius:12px;
+    margin:8px 0;
+}
+#loginScreen{
+    min-height:100vh;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:20px;
+}
+.loginBox{
+    background:white;
+    width:100%;
+    max-width:420px;
+    padding:25px;
+    border-radius:22px;
+    box-shadow:0 8px 30px rgba(0,0,0,.1);
+}
+.logo{
+    text-align:center;
+    font-size:38px;
+}
+.hidden{display:none}
+@media(max-width:600px){
+    .stats{grid-template-columns:1fr}
+}
+</style>
+</head>
+
+<body>
+
+<!-- LOGIN -->
+<div id="loginScreen">
+<div class="loginBox">
+<div class="logo">🎓</div>
+<h1 style="text-align:center">AttendSmart AI</h1>
+<p style="text-align:center" class="small">
+Smart attendance + timetable assistant
+</p>
+
+<input id="nameInput" placeholder="Student name">
+<input id="collegeInput" placeholder="College name">
+<input id="emailInput" type="email" placeholder="Email">
+
+<button onclick="login()">Sign In</button>
+
+<p class="small" style="text-align:center">
+Demo login — no password required
+</p>
+</div>
+</div>
+
+<!-- APP -->
+<div id="app" class="hidden">
+
+<header>
+<h1>🎓 AttendSmart AI</h1>
+<p id="welcome">Welcome Student</p>
+</header>
+
+<div class="container">
+
+<div class="nav">
+<button class="active" onclick="showPage('dashboard',this)">🏠 Dashboard</button>
+<button onclick="showPage('timetable',this)">📅 Timetable</button>
+<button onclick="showPage('attendance',this)">📊 Attendance</button>
+<button onclick="showPage('planner',this)">🧠 Smart Planner</button>
+</div>
+
+<!-- DASHBOARD -->
+<section id="dashboard" class="page active">
+
+<div class="card">
+<h2>Today's Smart Dashboard</h2>
+
+<div class="stats">
+<div class="stat">
+<strong id="overall">0%</strong>
+Overall
+</div>
+
+<div class="stat">
+<strong id="lowCount">0</strong>
+Low Subjects
+</div>
+
+<div class="stat">
+<strong id="todayCount">0</strong>
+Today's Classes
+</div>
+</div>
+</div>
+
+<div class="card">
+<h2>🔔 Smart Alerts</h2>
+<div id="alerts"></div>
+</div>
+
+<div class="card">
+<h2>⭐ Today's Priority</h2>
+<div id="priority"></div>
+</div>
+
+<div class="card">
+<h2>🚀 What makes AttendSmart different?</h2>
+
+<div class="feature">
+🧠 <b>Smart Attendance Prediction</b><br>
+Shows which subjects need attention instead of only displaying percentages.
+</div>
+
+<div class="feature">
+🎯 <b>What-If Calculator</b><br>
+Check how many classes you need to attend to reach your target percentage.
+</div>
+
+<div class="feature">
+🔔 <b>Smart Class Alerts</b><br>
+Highlights important classes and low-attendance subjects.
+</div>
+
+<div class="feature">
+📅 <b>Student Timetable Hub</b><br>
+Students can keep their timetable and attendance information together.
+</div>
+</div>
+
+</section>
+
+<!-- TIMETABLE -->
+<section id="timetable" class="page">
+
+<div class="card">
+<h2>📅 My Timetable</h2>
+
+<p class="small">
+Add your weekly timetable. It is stored in this browser.
+</p>
+
+<table class="schedule">
+<tr>
+<th>Day</th>
+<th>Period 1</th>
+<th>Period 2</th>
+<th>Period 3</th>
+<th>Period 4</th>
+</tr>
+
+<tr>
+<td>Monday</td>
+<td><input id="mon1" placeholder="Subject"></td>
+<td><input id="mon2" placeholder="Subject"></td>
+<td><input id="mon3" placeholder="Subject"></td>
+<td><input id="mon4" placeholder="Subject"></td>
+</tr>
+
+<tr>
+<td>Tuesday</td>
+<td><input id="tue1" placeholder="Subject"></td>
+<td><input id="tue2" placeholder="Subject"></td>
+<td><input id="tue3" placeholder="Subject"></td>
+<td><input id="tue4" placeholder="Subject"></td>
+</tr>
+
+<tr>
+<td>Wednesday</td>
+<td><input id="wed1" placeholder="Subject"></td>
+<td><input id="wed2" placeholder="Subject"></td>
+<td><input id="wed3" placeholder="Subject"></td>
+<td><input id="wed4" placeholder="Subject"></td>
+</tr>
+
+<tr>
+<td>Thursday</td>
+<td><input id="thu1" placeholder="Subject"></td>
+<td><input id="thu2" placeholder="Subject"></td>
+<td><input id="thu3" placeholder="Subject"></td>
+<td><input id="thu4" placeholder="Subject"></td>
+</tr>
+
+<tr>
+<td>Friday</td>
+<td><input id="fri1" placeholder="Subject"></td>
+<td><input id="fri2" placeholder="Subject"></td>
+<td><input id="fri3" placeholder="Subject"></td>
+<td><input id="fri4" placeholder="Subject"></td>
+</tr>
+</table>
+
+<button onclick="saveTimetable()">💾 Save Timetable</button>
+
+<hr>
+
+<h3>📷 Timetable Upload</h3>
+<input type="file" accept="image/*" onchange="previewTimetable(event)">
+<img id="preview" style="width:100%;margin-top:10px;border-radius:12px;display:none">
+
+<p class="small">
+Upload your timetable image here for quick reference.
+</p>
+
+</div>
+</section>
+
+<!-- ATTENDANCE -->
+<section id="attendance" class="page">
+
+<div class="card">
+<h2>📊 Subject Attendance</h2>
+
+<div class="subject" id="mathBox">
+<b>Mathematics</b>
+<p>Present: <span id="mathP">0</span> | Total: <span id="mathT">0</span></p>
+<div class="progress"><div class="bar" id="mathBar"></div></div>
+<p id="mathPercent">0%</p>
+<button onclick="mark('math',true)">Present</button>
+<button onclick="mark('math',false)" style="background:#ef4444">Absent</button>
+</div>
+
+<div class="subject" id="pythonBox">
+<b>Python Programming</b>
+<p>Present: <span id="pythonP">0</span> | Total: <span id="pythonT">0</span></p>
+<div class="progress"><div class="bar" id="pythonBar"></div></div>
+<p id="pythonPercent">0%</p>
+<button onclick="mark('python',true)">Present</button>
+<button onclick="mark('python',false)" style="background:#ef4444">Absent</button>
+</div>
+
+<div class="subject" id="physicsBox">
+<b>Physics</b>
+<p>Present: <span id="physicsP">0</span> | Total: <span id="physicsT">0</span></p>
+<div class="progress"><div class="bar" id="physicsBar"></div></div>
+<p id="physicsPercent">0%</p>
+<button onclick="mark('physics',true)">Present</button>
+<button onclick="mark('physics',false)" style="background:#ef4444">Absent</button>
+</div>
+
+</div>
+
+<div class="card">
+<h2>🎯 What-If Attendance Calculator</h2>
+
+<select id="calcSubject">
+<option value="math">Mathematics</option>
+<option value="python">Python Programming</option>
+<option value="physics">Physics</option>
+</select>
+
+<input id="target" type="number" value="75" min="1" max="100"
+placeholder="Target percentage">
+
+<button onclick="calculate()">Calculate</button>
+
+<div id="calcResult"></div>
+</div>
+
+</section>
+
+<!-- SMART PLANNER -->
+<section id="planner" class="page">
+
+<div class="card">
+<h2>🧠 Smart Attendance Planner</h2>
+
+<p>
+AttendSmart analyses your attendance and gives a simple priority plan.
+</p>
+
+<div id="plan"></div>
+</div>
+
+<div class="card">
+<h2>💡 Study Reminder</h2>
+
+<p>
+Use your timetable + attendance together to decide which class needs more attention.
+</p>
+
+<button onclick="smartTip()">Generate Smart Tip</button>
+
+<div id="tip"></div>
+</div>
+
+<div class="card">
+<h2>👤 Student Profile</h2>
+<p><b>Name:</b> <span id="profileName"></span></p>
+<p><b>College:</b> <span id="profileCollege"></span></p>
+<p><b>Email:</b> <span id="profileEmail"></span></p>
+
+<button class="logout" onclick="logout()">Logout</button>
+</div>
+
+</section>
+
+</div>
+</div>
+
+<script>
+
+const subjects={
+math:{name:"Mathematics",p:0,t:0},
+python:{name:"Python Programming",p:0,t:0},
+physics:{name:"Physics",p:0,t:0}
+};
+
+function login(){
+
+let name=document.getElementById("nameInput").value.trim();
+let college=document.getElementById("collegeInput").value.trim();
+let email=document.getElementById("emailInput").value.trim();
+
+if(!name){
+alert("Please enter your name");
+return;
+}
+
+localStorage.setItem("studentName",name);
+localStorage.setItem("college",college);
+localStorage.setItem("email",email);
+
+document.getElementById("loginScreen").style.display="none";
+document.getElementById("app").classList.remove("hidden");
+
+loadUser();
+}
+
+function loadUser(){
+
+let name=localStorage.getItem("studentName")||"Student";
+let college=localStorage.getItem("college")||"Not added";
+let email=localStorage.getItem("email")||"Not added";
+
+document.getElementById("welcome").innerText=
+"Welcome, "+name+" 👋";
+
+document.getElementById("profileName").innerText=name;
+document.getElementById("profileCollege").innerText=college;
+document.getElementById("profileEmail").innerText=email;
+
+update();
+}
+
+function showPage(id,btn){
+
+document.querySelectorAll(".page").forEach(p=>{
+p.classList.remove("active");
+});
+
+document.getElementById(id).classList.add("active");
+
+document.querySelectorAll(".nav button").forEach(b=>{
+b.classList.remove("active");
+});
+
+btn.classList.add("active");
+
+update();
+}
+
+function mark(id,present){
+
+subjects[id].t++;
+
+if(present){
+subjects[id].p++;
+}
+
+saveData();
+update();
+}
+
+function saveData(){
+
+localStorage.setItem("attendance",
+JSON.stringify(subjects));
+
+}
+
+function loadData(){
+
+let data=localStorage.getItem("attendance");
+
+if(data){
+
+let saved=JSON.parse(data);
+
+for(let id in saved){
+
+subjects[id].p=saved[id].p;
+subjects[id].t=saved[id].t;
+
+}
+
+}
+
+}
+
+function update(){
+
+loadData();
+
+let totalP=0,totalT=0,low=0;
+
+for(let id in subjects){
+
+let s=subjects[id];
+
+totalP+=s.p;
+totalT+=s.t;
+
+let percent=s.t?
+Math.round((s.p/s.t)*100):0;
+
+document.getElementById(id+"P").innerText=s.p;
+document.getElementById(id+"T").innerText=s.t;
+document.getElementById(id+"Percent").innerText=percent+"%";
+document.getElementById(id+"Bar").style.width=percent+"%";
+
+let box=document.getElementById(id+"Box");
+
+if(percent<75 && s.t>0){
+box.classList.add("low");
+low++;
+}else{
+box.classList.remove("low");
+}
+
+}
+
+let overall=totalT?
+Math.round((totalP/totalT)*100):0;
+
+document.getElementById("overall").innerText=overall+"%";
+document.getElementById("lowCount").innerText=low;
+
+generateAlerts();
+generatePlan();
+}
+
+function generateAlerts(){
+
+let html="";
+
+for(let id in subjects){
+
+let s=subjects[id];
+
+if(s.t===0)continue;
+
+let percent=Math.round((s.p/s.t)*100);
+
+if(percent<75){
+
+html+=`
+<div class="alert">
+⚠️ <b>${s.name}</b> is at ${percent}%.
+Try to attend upcoming classes regularly.
+</div>`;
+
+}
+
+}
+
+if(html===""){
+html=`
+<div class="success">
+✅ No low-attendance warning yet. Keep attending your classes!
+</div>`;
+}
+
+document.getElementById("alerts").innerHTML=html;
+
+}
+
+function generatePlan(){
+
+let html="";
+
+let sorted=Object.values(subjects)
+.filter(s=>s.t>0)
+.sort((a,b)=>(a.p/a.t)-(b.p/b.t));
+
+if(sorted.length===0){
+
+html="<p>Add attendance to generate your smart plan.</p>";
+
+}else{
+
+sorted.forEach((s,i)=>{
+
+let percent=Math.round((s.p/s.t)*100);
+
+html+=`
+<div class="feature">
+${i===0?"🔥":i===1?"⭐":"📚"}
+<b>${i===0?"High Priority":i===1?"Medium Priority":"Normal Priority"}</b>
+— ${s.name}: ${percent}%
+</div>`;
+
+});
+
+}
+
+document.getElementById("plan").innerHTML=html;
+
+}
+
+function calculate(){
+
+let id=document.getElementById("calcSubject").value;
+let target=Number(document.getElementById("target").value);
+
+let s=subjects[id];
+
+if(s.t===0){
+
+document.getElementById("calcResult").innerHTML=
+`<div class="alert">No attendance data available for ${s.name}.</div>`;
+
+return;
+
+}
+
+let current=(s.p/s.t)*100;
+
+if(current>=target){
+
+document.getElementById("calcResult").innerHTML=
+`<div class="success">
+🎉 Your current attendance is ${Math.round(current)}%.
+You already reached the ${target}% target.
+</div>`;
+
+return;
+
+}
+
+let needed=Math.ceil(
+(target*s.t/100-s.p)/(1-target/100)
+);
+
+document.getElementById("calcResult").innerHTML=
+`<div class="alert">
+🎯 Current: ${Math.round(current)}%<br>
+📌 Target: ${target}%<br><br>
+You need to attend approximately
+<b>${needed} upcoming classes</b>
+continuously to reach your target.
+</div>`;
+
+}
+
+function smartTip(){
+
+let tips=[
+"📚 Focus first on your lowest-attendance subject.",
+"⏰ Check tomorrow's timetable before going to college.",
+"🎯 Try to maintain attendance above your college requirement.",
+"🧠 Use the What-If Calculator before planning to miss a class.",
+"🔔 Keep your timetable updated so Smart Planner can help you better."
+];
+
+let random=tips[Math.floor(Math.random()*tips.length)];
+
+document.getElementById("tip").innerHTML=
+`<div class="success">${random}</div>`;
+
+}
+
+function saveTimetable(){
+
+localStorage.setItem("timetableSaved","yes");
+
+alert("✅ Timetable saved successfully!");
+
+document.getElementById("todayCount").innerText="4";
+
+}
+
+function previewTimetable(event){
+
+let file=event.target.files[0];
+
+if(!file)return;
+
+let img=document.getElementById("preview");
+
+img.src=URL.createObjectURL(file);
+img.style.display="block";
+
+}
+
+function logout(){
+
+localStorage.removeItem("studentName");
+localStorage.removeItem("college");
+localStorage.removeItem("email");
+
+location.reload();
+
+}
+
+if(localStorage.getItem("studentName")){
+
+document.getElementById("loginScreen").style.display="none";
+document.getElementById("app").classList.remove("hidden");
+
+loadUser();
+
+}
+
+</script>
+
+</body>
+</html>
